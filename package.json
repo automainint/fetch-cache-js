@@ -1,0 +1,14 @@
+{
+  "name": "fetch-cache-js",
+  "version": "0.1.1",
+  "description": "Fetch cache.",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "Mitya Selivanov (https://guattari.ru/contact)",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
