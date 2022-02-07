@@ -3,8 +3,10 @@
 
 'use strict';
 
-const default_fetch = require('node-fetch');
+const abort_controller        = require('abort-controller');
+const default_fetch_upstream  = require('node-fetch');
 
+const default_fetch_timeout = 10000;
 const default_cache_timeout = 5000;
 
 function default_request_filter(url, request_options) {
@@ -22,7 +24,8 @@ function default_wrap_options(request_options) {
 }
 
 const options = {
-  fetch:            default_fetch,
+  fetch_upstream:   default_fetch_upstream,
+  fetch_timeout:    default_fetch_timeout,
   cache_timeout:    default_cache_timeout,
   request_filter:   default_request_filter,
   response_filter:  default_response_filter,
@@ -79,8 +82,29 @@ async function cache(custom_fetch, url, request_options) {
 
 fetch = function(url, request_options) {
   return new Promise((resolve, reject) => {
-    cache(options.fetch, url, options.wrap_options(request_options))
+    let timeout_id      = 0;
+    let wrapped_options = options.wrap_options(request_options);
+
+    if (!wrapped_options) {
+      wrapped_options = {};
+    }
+
+    if (!('signal' in wrapped_options)) {
+      const controller = new abort_controller();
+
+      timeout_id = setTimeout(
+        () => controller.abort(),
+        options.fetch_timeout);
+
+      wrapped_options.signal = controller.signal;
+    }
+
+    cache(options.fetch_upstream, url, wrapped_options)
       .then(response => {
+        if (timeout_id != 0) {
+          clearTimeout(timeout_id);
+        }
+
         resolve(response);
       })
       .catch(error => {
