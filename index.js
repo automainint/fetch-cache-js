@@ -41,7 +41,7 @@ async function save_response(url, response) {
   }
 
   response_pool[url] = {
-    time: Date.now(),
+    time:     Date.now(),
     response: response.clone()
   };
 }
