@@ -72,7 +72,7 @@ function autoclean() {
     return;
   }
 
-  if (autoclean_index > entries.length) {
+  if (autoclean_index >= entries.length) {
     autoclean_index = 0;
   }
 
