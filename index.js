@@ -6,8 +6,9 @@
 const abort_controller        = require('abort-controller');
 const default_fetch_upstream  = require('node-fetch');
 
-const default_fetch_timeout = 10000;
-const default_cache_timeout = 5000;
+const default_fetch_timeout   = 10000;
+const default_cache_timeout   = 5000;
+const default_autoclean_count = 20;
 
 function default_request_filter(url, request_options) {
   return  !request_options ||
@@ -29,7 +30,8 @@ const options = {
   cache_timeout:    default_cache_timeout,
   request_filter:   default_request_filter,
   response_filter:  default_response_filter,
-  wrap_options:     default_wrap_options
+  wrap_options:     default_wrap_options,
+  autoclean_count:  default_autoclean_count
 };
 
 let response_pool = {};
@@ -62,12 +64,26 @@ function check_timeout(url) {
           time_elapsed(url) < options.cache_timeout;
 }
 
+function autoclean() {
+  const entries = Object.entries(response_pool);
+
+  for (let i = 0; i < entries.length && i < options.autoclean_count; i++) {
+    const [ key, value ] = entries[i];
+
+    if (Date.now() - value.time >= options.cache_timeout) {
+      delete response_pool[key];
+    }
+  }
+}
+
 var fetch;
 
 async function cache(custom_fetch, url, request_options) {
   if (custom_fetch === fetch) {
     throw "Infinite recursion.";
   }
+
+  autoclean();
 
   if (!options.request_filter(url, request_options)) {
     return await custom_fetch(url, request_options);
