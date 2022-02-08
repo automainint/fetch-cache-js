@@ -34,7 +34,8 @@ const options = {
   autoclean_count:  default_autoclean_count
 };
 
-let response_pool = {};
+let response_pool   = {};
+let autoclean_index = 0;
 
 function clear() {
   response_pool = {};
@@ -67,13 +68,26 @@ function check_timeout(url) {
 function autoclean() {
   const entries = Object.entries(response_pool);
 
-  for (let i = 0; i < entries.length && i < options.autoclean_count; i++) {
-    const [ key, value ] = entries[i];
+  if (entries.length == 0) {
+    return;
+  }
+
+  if (autoclean_index > entries.length) {
+    autoclean_index = 0;
+  }
+
+  for ( let i = 0;
+        autoclean_index + i < entries.length &&
+        i < options.autoclean_count;
+        i++) {
+    const [ key, value ] = entries[autoclean_index + i];
 
     if (Date.now() - value.time >= options.cache_timeout) {
       delete response_pool[key];
     }
   }
+
+  autoclean_index += options.autoclean_count;
 }
 
 var fetch;
