@@ -111,36 +111,38 @@ async function cache(custom_fetch, url, request_options) {
 }
 
 fetch = function(url, request_options) {
-  return new Promise((resolve, reject) => {
-    let timeout_id      = 0;
-    let wrapped_options = options.wrap_options(request_options);
+  let timeout_id      = 0;
+  let wrapped_options = options.wrap_options(request_options);
 
-    if (!wrapped_options) {
-      wrapped_options = {};
+  if (!wrapped_options) {
+    wrapped_options = {};
+  }
+
+  if (!('signal' in wrapped_options)) {
+    const controller = new abort_controller();
+
+    timeout_id = setTimeout(
+      () => controller.abort(),
+      options.fetch_timeout);
+
+    wrapped_options.signal = controller.signal;
+  }
+
+  const clear_if_have_timeout = () => {
+    if (timeout_id != 0) {
+      clearTimeout(timeout_id);
     }
+  };
 
-    if (!('signal' in wrapped_options)) {
-      const controller = new abort_controller();
-
-      timeout_id = setTimeout(
-        () => controller.abort(),
-        options.fetch_timeout);
-
-      wrapped_options.signal = controller.signal;
-    }
-
-    cache(options.fetch_upstream, url, wrapped_options)
-      .then(response => {
-        if (timeout_id != 0) {
-          clearTimeout(timeout_id);
-        }
-
-        resolve(response);
-      })
-      .catch(error => {
-        reject(error);
-      });
-  });
+  return cache(options.fetch_upstream, url, wrapped_options)
+    .then(response => {
+      clear_if_have_timeout();
+      return response;
+    })
+    .catch(error => {
+      clear_if_have_timeout();
+      throw error;
+    });
 }
 
 module.exports = {
