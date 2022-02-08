@@ -39,14 +39,14 @@ function clear() {
 }
 
 async function save_response(url, response) {
-  if (!options.response_filter(response)) {
-    return response;
+  if (options.response_filter(response)) {
+    response_pool[url] = {
+      time:     Date.now(),
+      response: response.clone()
+    };
   }
 
-  response_pool[url] = {
-    time:     Date.now(),
-    response: response.clone()
-  };
+  return response;
 }
 
 function load_response(url) {
@@ -73,11 +73,11 @@ async function cache(custom_fetch, url, request_options) {
     return await custom_fetch(url, request_options);
   }
 
-  if (!check_timeout(url)) {
-    await save_response(url, await custom_fetch(url, request_options));
+  if (check_timeout(url)) {
+    return load_response(url);
   }
 
-  return load_response(url);
+  return await save_response(url, await custom_fetch(url, request_options));
 }
 
 fetch = function(url, request_options) {
