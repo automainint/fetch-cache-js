@@ -37,6 +37,16 @@ async function test_custom_fetch() {
   return fetch_called == 1;
 }
 
+async function test_wrong_url() {
+  try {
+    await (await fetch('https://wrong-url.wrongdomain')).text();
+  } catch (error) {
+    return true;
+  }
+
+  return false;
+}
+
 let test_count = 0;
 let fail_count = 0;
 
@@ -75,6 +85,7 @@ async function run_tests() {
 
   await add_test(test_fetch_google, 'Fetch Google.');
   await add_test(test_custom_fetch, 'Custom fetch function.');
+  await add_test(test_wrong_url, 'Wrong URL.');
 
   console.log(`\n${test_count - fail_count} of ${test_count} tests pass.`);
 
