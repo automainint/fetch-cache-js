@@ -3,8 +3,9 @@
 
 'use strict';
 
-const { fetch, cache, clear } = require('./index.js');
-const node_fetch              = require('node-fetch');
+const { fetch, cache, clear, options } = require('./index.js');
+
+const node_fetch = require('node-fetch');
 
 async function test_fetch_google() {
   let foo = await (await fetch('https://google.com')).text();
@@ -31,8 +32,8 @@ async function test_custom_fetch() {
 
   clear();
 
-  let foo = await (await cache(my_fetch, 'https://google.com')).text();
-  let bar = await (await cache(my_fetch, 'https://google.com')).text();
+  await (await cache(my_fetch, 'https://google.com')).text();
+  await (await cache(my_fetch, 'https://google.com')).text();
 
   return fetch_called == 1;
 }
@@ -45,6 +46,48 @@ async function test_wrong_url() {
   }
 
   return false;
+}
+
+async function test_cache_timeout() {
+  let fetch_called = 0;
+
+  const my_fetch = function(url, options) {
+    return new Promise((resolve, reject) => {
+      fetch_called++;
+      node_fetch(url, options)
+        .then(response => {
+          resolve(response);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  };
+
+  const cache_timeout_back = options.cache_timeout;
+  options.cache_timeout = 300;
+  clear();
+
+  await (await cache(my_fetch, 'https://google.com')).text();
+
+  const sleep_and_fetch = function(url) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        cache(my_fetch, url)
+          .then(response => {
+            resolve(response);
+          })
+          .catch(error => {
+            reject(error);
+          });
+      }, 600);
+    });
+  };
+
+  await (await sleep_and_fetch('https://google.com')).text();
+
+  options.cache_timeout = cache_timeout_back;
+  return fetch_called == 2;
 }
 
 let test_count = 0;
@@ -86,6 +129,7 @@ async function run_tests() {
   await add_test(test_fetch_google, 'Fetch Google.');
   await add_test(test_custom_fetch, 'Custom fetch function.');
   await add_test(test_wrong_url, 'Wrong URL.');
+  await add_test(test_cache_timeout, 'Cache timeout.');
 
   console.log(`\n${test_count - fail_count} of ${test_count} tests pass.`);
 
