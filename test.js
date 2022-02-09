@@ -129,9 +129,7 @@ async function run_tests() {
 
   console.log(`\n${test_count - fail_count} of ${test_count} tests pass.`);
 
-  if (fail_count == 0) {
-    process.exit(0);
-  } else {
+  if (fail_count != 0) {
     process.exit(1);
   }
 }
