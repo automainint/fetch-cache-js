@@ -37,7 +37,7 @@ const bar = fetch('https://google.com'); // cached response
 - `request_filter` - request filter function. By default, only `GET` requests are cached.
 - `response_filter` - response filter function. By default, only responses with status `200` OK are called.
 - `wrap_options` - wrap options function. By default, don't change options.
-- `autoclean_count` - how many caches responses to check for timeout when `cache` is called. Default is `20`.
+- `autoclean_count` - how many cache responses to check for timeout when `cache` is called. Default is `20`.
 
 ## For tip
 - `btc` Bitcoin `bc1qau5y9wf49ammclhscuelwlm6370d9lqph6g9um`
