@@ -24,7 +24,7 @@ const bar = fetch('https://google.com'); // cached response
 ```
 
 ##  API
-- `fetch(url, options)` - call `cache(fetch_upstream, url, wrap_options(options))`.
+- `fetch(url, options)` - setup timeout with `fetch_timeout` and call `cache(fetch_upstream, url, wrap_options(options))`.
 - `cache(fetch, url, options)` - check if `url` is cached and return the cached response, or call `fetch` otherwise and cache the response.
   - If `request_filter(url, options)` returns `false`, just call `fetch` and return the response.
   - If `response_filter(response)` returns `false`, don't cache the response.
