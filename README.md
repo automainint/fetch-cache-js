@@ -34,8 +34,8 @@ const bar = fetch('https://google.com'); // cached response
 - `fetch_upstream` - upstream `fetch` function. Default is `require('node-fetch')`.
 - `fetch_timeout` - fetch timeout in milliseconds. Default is `10000`.
 - `cache_timeout` - cache timeout in milliseconds. Default is `5000`.
-- `request_filter` - request filter function. By default, only `GET` requests are cached.
-- `response_filter` - response filter function. By default, only responses with status `200` OK are called.
+- `request_filter` - request filter function. By default, only `GET` request responses are cached.
+- `response_filter` - response filter function. By default, only responses with status `200` OK are cached.
 - `wrap_options` - wrap options function. By default, don't change options.
 - `autoclean_count` - how many cache responses to check for timeout when `cache` is called. Default is `20`.
 
