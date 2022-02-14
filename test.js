@@ -86,6 +86,24 @@ async function test_cache_timeout() {
   return fetch_called == 2;
 }
 
+async function test_fetch_timeout() {
+  const fetch_timeout_back = options.fetch_timeout;
+  options.fetch_timeout = 1;
+  clear();
+
+  let ok = false;
+
+  try {
+    await (await fetch('https://google.com')).text();
+  } catch (error) {
+    if (error.type == 'aborted')
+      ok = true;
+  }
+
+  options.fetch_timeout = fetch_timeout_back;
+  return ok;
+}
+
 let test_count = 0;
 let fail_count = 0;
 
@@ -126,6 +144,7 @@ async function run_tests() {
   await add_test(test_custom_fetch,   'Custom fetch function.');
   await add_test(test_wrong_url,      'Wrong URL.');
   await add_test(test_cache_timeout,  'Cache timeout.');
+  await add_test(test_fetch_timeout,  'Fetch timeout.');
 
   console.log(`\n${test_count - fail_count} of ${test_count} tests pass.`);
 
