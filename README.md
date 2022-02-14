@@ -19,8 +19,8 @@ const { fetch, options } = require('./fetch-cache/index.js');
 //  set timeout 2 sec
 options.cache_timeout = 2000;
 
-const foo = await fetch('https://google.com');
-const bar = await fetch('https://google.com'); // cached response
+const foo = await fetch('https://github.com');
+const bar = await fetch('https://github.com'); // cached response
 ```
 
 ##  API
